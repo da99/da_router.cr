@@ -19,13 +19,13 @@ module DA_ROUTER
     true
   end # === def self.is_match?
 
-  macro crumbs(ctx)
+  macro route(ctx)
     crumbs__ = ({{ctx}}.path).split("/").reject { |s| s.empty? }
     ctx__ = {{ctx}}
     {{yield}}
     crumbs__ = nil
     ctx__ = nil
-  end # === macro crumbs
+  end # === macro route
 
   macro path_to_tuple(path)
     {% pieces = path.split("/").reject { |x| x.empty? }.map { |x| x[0..0] == ":" ? x.id : x.stringify } %}

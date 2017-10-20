@@ -17,10 +17,10 @@ end # === struct MAIN
 
 include DA_ROUTER
 
-crumbs(CTX.new("GET", "/hello/kevin.smith")) do
+route(CTX.new("GET", "/hello/kevin.smith")) do
   get("/hello/:world", MAIN, :hello)
 end
 
-crumbs(CTX.new("GET", "/hello/outer/world")) do
+route(CTX.new("GET", "/hello/outer/world")) do
   get("/hello/:outer/:world", MAIN, :hello_type)
 end
