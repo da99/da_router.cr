@@ -14,6 +14,7 @@ local +x THIS_DIR="$(dirname "$(dirname "$(realpath "$0")")")"
 PATH="$PATH:$THIS_DIR/bin"
 PATH="$PATH:$THIS_DIR/../my_crystal/bin"
 PATH="$PATH:$THIS_DIR/../process/bin"
+PATH="$PATH:$THIS_DIR/../sh_color/bin"
 
 case $ACTION in
 

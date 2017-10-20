@@ -20,7 +20,7 @@ module DA_ROUTER
   end # === def self.is_match?
 
   macro route(ctx)
-    crumbs__ = ({{ctx}}.request.path).split("/").reject { |s| s.empty? }
+    crumbs__ = nil
     ctx__ = {{ctx}}
     {{yield}}
     crumbs__ = nil
@@ -33,8 +33,9 @@ module DA_ROUTER
   end # === macro to_tuple
 
   macro route(http_method, path, klass, meth)
+    crumbs__ = crumbs__ || (ctx__.request.path).split("/").reject { |s| s.empty? }
     if DA_ROUTER.is_match?(crumbs__, path_to_tuple({{path}})) && ctx__.request.method == "{{http_method.upcase.id}}"
-      {{klass}}.new(ctx__).{{http_method.downcase.id}}_{{meth.id}}(
+      return {{klass}}.new(ctx__).{{http_method.downcase.id}}_{{meth.id}}(
         {%
          positions = [] of StringLiteral
          i = -1
@@ -55,6 +56,12 @@ module DA_ROUTER
   {% for m in %w(head get post put patch delete options) %}
     macro {{m.id}}(*args)
       route({{m}}, \{{*args}})
+    end
+
+    macro root_{{m.id}}(klass, meth, &blok)
+      if ctx__.request.path == "/" && ctx__.request.method == "{{m.upcase.id}}"
+        return \{{klass}}.new(ctx__).{{m.downcase.id}}_\{{meth.id}}
+      end
     end
   {% end %}
 
