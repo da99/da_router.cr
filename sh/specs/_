@@ -22,6 +22,7 @@ case "$ACTION" in
   run)
     cd "$THIS_DIR"
     mkdir -p tmp/in tmp/out
+    sh_color ORANGE "=== {{Compiling}}..."
     my_crystal __ build specs/specs.cr -o tmp/out/specs
     tmp/out/specs
     ;;
