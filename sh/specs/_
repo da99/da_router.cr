@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+if [[ -z "$@" ]]; then
+  local +x ACTION=watch
+else
+  local +x ACTION=$1; shift
+fi
+
+case "$ACTION" in
+
+  watch)
+    local +x CMD="da_router.cr specs run"
+    ${=CMD} || :
+    process watch "-r sh -r bin -r src -r specs" "$CMD"
+    ;;
+
+  run)
+    cd "$THIS_DIR"
+    mkdir -p tmp/in tmp/out
+    my_crystal __ build specs/specs.cr -o tmp/out/specs
+    tmp/out/specs
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+
+esac
+
