@@ -19,9 +19,13 @@ module DA_ROUTER
     true
   end # === def self.is_match?
 
-  def to_crumbs(str)
-    str.split("/").reject { |s| s.empty? }
-  end # === def self.split_path
+  macro crumbs(ctx)
+    crumbs__ = ({{ctx}}.path).split("/").reject { |s| s.empty? }
+    ctx__ = {{ctx}}
+    {{yield}}
+    crumbs__ = nil
+    ctx__ = nil
+  end # === macro crumbs
 
   macro path_to_tuple(path)
     {% pieces = path.split("/").reject { |x| x.empty? }.map { |x| x[0..0] == ":" ? x.id : x.stringify } %}
@@ -29,15 +33,15 @@ module DA_ROUTER
   end # === macro to_tuple
 
   macro route(http_method, path, klass, meth)
-    if DA_ROUTER.is_match?(crumbs, path_to_tuple({{path}})) && ctx.http_method == "{{http_method.upcase.id}}"
-      {{klass}}.new(ctx).{{http_method.downcase.id}}_{{meth.id}}(
+    if DA_ROUTER.is_match?(crumbs__, path_to_tuple({{path}})) && ctx__.http_method == "{{http_method.upcase.id}}"
+      {{klass}}.new(ctx__).{{http_method.downcase.id}}_{{meth.id}}(
         {%
          positions = [] of StringLiteral
          i = -1
          path.split("/").reject { |s| s.empty? }.map { |s|
            i = i + 1
            if s[0..0] == ":"
-             positions.push("crumbs[" + i.stringify + "]")
+             positions.push("crumbs__[" + i.stringify + "]")
            else
              nil
            end
