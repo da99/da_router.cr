@@ -20,7 +20,7 @@ struct IT_WORKS
   def self.run(meth, path)
     ctx = CTX.new(meth, path)
     route(ctx) do
-      root_get(IT_WORKS, :root)
+      get("/", IT_WORKS, :root)
       get("/hello/:world", IT_WORKS, :hello)
       get("/hello/:outer/:world", IT_WORKS, :hello_type)
     end
