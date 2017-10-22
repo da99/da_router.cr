@@ -39,6 +39,12 @@ module DA_ROUTER
     { {{pieces.join(", ").id}} }
   end # === macro to_tuple
 
+  {% for m in %w(head get post put patch delete options) %}
+    macro {{m.id}}(*args)
+      route({{m}}, \{{*args}})
+    end
+  {% end %}
+
   macro route(http_method, path, klass, meth)
     {% if path == "/" %}
       if ctx__.request.path == "/" && ctx__.request.method == "{{http_method.upcase.id}}"
@@ -65,12 +71,6 @@ module DA_ROUTER
       end
     {% end %}
   end # === macro match
-
-  {% for m in %w(head get post put patch delete options) %}
-    macro {{m.id}}(*args)
-      route({{m}}, \{{*args}})
-    end
-  {% end %}
 
 end # === module DA_ROUTER
 
