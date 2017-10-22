@@ -1,9 +1,9 @@
 
 struct IT_WORKS
 
-  getter :ctx
-  def initialize(@ctx : CTX)
-  end # === def initialize
+  include DA_ROUTER
+
+  getter ctx : CTX
 
   def get_root
     ctx.results = "root /"

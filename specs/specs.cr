@@ -2,8 +2,6 @@
 require "../src/da_router"
 require "spec"
 
-include DA_ROUTER
-
 class CTX
 
   getter :request

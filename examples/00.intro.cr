@@ -6,10 +6,6 @@ class Scratch
 
   include DA_ROUTER
 
-  getter :ctx
-  def initialize(@ctx : HTTP::Server::Context)
-  end # === def initialize
-
   def write(s)
     ctx.response << s
   end

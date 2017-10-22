@@ -1,6 +1,13 @@
 
+require "http"
 
 module DA_ROUTER
+
+  macro included
+    getter ctx : HTTP::Server::Context
+    def initialize(@ctx)
+    end # === def initialize
+  end
 
   extend self
 
