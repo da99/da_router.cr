@@ -20,6 +20,16 @@ case "$ACTION" in
     ;;
 
   run)
+    case "$CHANGED_FILE" in
+      */da_router.writer)
+        exit 0
+        ;;
+
+      */writer.cr)
+        da_router.cr dev run
+        ;;
+    esac
+
     cd "$THIS_DIR"
     mkdir -p tmp/in tmp/out
     sh_color ORANGE "=== {{Compiling}}..."

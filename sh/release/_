@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+#
+# === {{CMD}}
+#
+set -u -e -o pipefail
+
+local +x ORIGINAL_ARGS="$@"
+if [[ -z "$@" ]]; then
+  local +x ACTION=run
+else
+  local +x ACTION=$1; shift
+fi
+
+case "$ACTION" in
+
+  run)
+    cd "$THIS_DIR"
+    mkdir -p tmp/in tmp/out
+    local +x args="--release --no-debug"
+    sh_color ORANGE "=== {{Compiling}} writer: $args"
+    my_crystal __ build ${=args} src/da_router/writer.cr -o bin/da_router.writer
+    sh_color GREEN "=== {{Done}}: bin/da_router.writer ==="
+    ;;
+
+  *)
+    echo "!!! Unknown arguments: $ORIGINAL_ARGS" >&2
+    exit 1
+    ;;
+
+esac
+

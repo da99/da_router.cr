@@ -5,25 +5,21 @@ struct IT_WORKS
 
   getter ctx : CTX
 
-  def get_root
+  get "/" do
     ctx.results = "root /"
   end # === def get_root
 
-  def get_hello(name : String)
+  get "/hello/:name" do
     ctx.results = "Hello, #{name}"
   end # === def get_hello
 
-  def get_hello_type(t : String, w : String)
-    ctx.results = "Hello, #{t} -> #{w}"
+  get "/hello/:outer/:world" do
+    ctx.results = "Hello, #{outer} -> #{world}"
   end # === def get_hello_type
 
   def self.run(meth, path)
     ctx = CTX.new(meth, path)
-    route(ctx) do
-      get("/", IT_WORKS, :root)
-      get("/hello/:world", IT_WORKS, :hello)
-      get("/hello/:outer/:world", IT_WORKS, :hello_type)
-    end
+    DA_ROUTER.route!(ctx)
     ctx.results
   end # === def routes
 

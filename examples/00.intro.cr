@@ -1,6 +1,5 @@
 
 require "http"
-require "../../../da_router.cr/src/da_router"
 
 class Scratch
 
@@ -10,28 +9,23 @@ class Scratch
     ctx.response << s
   end
 
-  def get_root
+  get "/" do
     ctx.response.content_type = "text/html; charset=utf-8"
     ctx.response << "hello #{ ctx.request.method }"
   end # === def get_root
 
-  def get_hello
+  get "/hello/world" do
     write "Hello, World: #{ ctx.request.method }"
   end # === def get_hello
 
-  def get_hello_more
+  get "/hello/the/entire/world" do
     write "Hello, The Entire World: #{ ctx.request.method }"
   end # === def get_hello_more
 
   def self.fulfill(ctx)
-    route(ctx) do
-      get("/", Scratch, :root)
-      get("/hello/world", Scratch, :hello)
-      get("/hello/the/entire/world", Scratch, :hello_more)
-
-      ctx.response.status_code = 404
-      ctx.response << "missing: #{ ctx.request.method } #{ctx.request.path}"
-    end
+    DA_ROUTER.route!(ctx)
+    ctx.response.status_code = 404
+    ctx.response << "missing: #{ ctx.request.method } #{ctx.request.path}"
   end
 
 end # === class Scratch
