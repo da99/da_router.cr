@@ -12,8 +12,6 @@ case "$ACTION" in
   run)
     cd "$THIS_DIR"
     mkdir -p tmp/in tmp/out
-    sh_color ORANGE "=== {{Compiling}} writer..."
-    my_crystal __ build src/da_router/writer.cr -o bin/da_router.writer
     ;;
 
   *)

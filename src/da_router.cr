@@ -1,5 +1,5 @@
 
-{% system("#{__DIR__}/../bin/da_router.writer reset") %}
+{% system(%[bash -c "echo '' > /tmp/da_routes.$(basename $PWD).tmp"]) %}
 require "http"
 
 module DA_ROUTER
@@ -50,7 +50,7 @@ module DA_ROUTER
 
   macro route(http_method, path, klass, &blok)
     {% meth = "#{http_method.id}#{path.downcase.gsub(/[^a-z0-9\_]/, "_").id}".id %}
-    {% system("#{__DIR__}/../bin/da_router.writer new_route #{http_method.id} #{path.id} #{klass.id} :#{meth.id}") %}
+    {% system(%[bash -c "echo #{http_method.id} #{path.id} #{klass.id} :#{meth.id} >> /tmp/da_router.$(basename $PWD).tmp"]) %}
     {% arg_names = path.split("/").select { |x| x =~ /^:/ }.map { |x| x.gsub(/^\:/, "").id }.join(", ").id %}
     def {{meth.id}}({{arg_names}})
       {{blok.body}}
@@ -64,7 +64,7 @@ module DA_ROUTER
     {% meth_name = "get#{path.downcase.gsub(/[^a-z0-9\_]/, "_").id}".id %}
     {% arg_names = path.split("/").select { |x| x =~ /^:/ }.map { |x| x.gsub(/^\:/, "").id }.join(", ").id %}
 
-    {% puts system("#{__DIR__}/../../out/writer new_path get #{path.id}, #{@type.name}, :#{meth_name}").stringify %}
+    {% puts system(%[bash -c "echo  get #{path.id} #{@type.name} :#{meth_name} >> /tmp/da_router.$(basename $PWD).tmp"]).stringify %}
     def {{meth_name}}({{arg_names}})
       {{blok.body}}
     end
@@ -73,7 +73,7 @@ module DA_ROUTER
   macro route!(ctx)
     crumbs__ = nil
     ctx__ = {{ctx}}
-    {% for line in system("#{__DIR__}/../bin/da_router.writer get_code").split("\n") %}
+    {% for line in system("cat /tmp/da_router.$(basename $PWD).tmp").split("\n") %}
       {% if !line.strip.empty? %}
         {% line = line.split %}
         {% http_method = line.first %}
@@ -106,7 +106,7 @@ module DA_ROUTER
         {% end %}
       {% end %}
     {% end %}
-    {% system("#{__DIR__}/../bin/da_router.writer reset") %}
+    {% system(%[bash -c "rm -f /tmp/da_router.$(basename $PWD).tmp"]) %}
   end # === macro routes!
 
 end # === module DA_ROUTER

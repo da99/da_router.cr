@@ -17,9 +17,6 @@ case "$ACTION" in
     cd "$THIS_DIR"
     mkdir -p tmp/in tmp/out
     local +x args="--release --no-debug"
-    sh_color ORANGE "=== {{Compiling}} writer: $args"
-    my_crystal __ build ${=args} src/da_router/writer.cr -o bin/da_router.writer
-    sh_color GREEN "=== {{Done}}: bin/da_router.writer ==="
     ;;
 
   *)
