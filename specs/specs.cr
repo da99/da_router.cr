@@ -1,5 +1,5 @@
 
-require "../src/da_router"
+# require "../src/da_router"
 require "spec"
 
 class CTX

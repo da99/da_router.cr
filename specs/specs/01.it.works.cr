@@ -1,39 +1,45 @@
 
 class IT_WORKS
 
-  include DA_ROUTER
-
   getter ctx : CTX
+  def initialize(@ctx)
+  end # === def initialize
 
-  get "/" do
+  def root
     ctx.results = "root /"
-  end # === def get_root
+  end
 
-  get "/hello/:name" do
+  def hello(name)
     ctx.results = "Hello, #{name}"
-  end # === def get_hello
+  end
 
-  get "/hello/:outer/:world" do
+  # /hello/:outer/:world
+  def hello(outer, world)
     ctx.results = "Hello, #{outer} -> #{world}"
-  end # === def get_hello_type
+  end
 
   def self.run(meth, path)
     ctx = CTX.new(meth, path)
     path = ctx.request.path
     case
     when path == "/"
-      IT_WORKS.get("/")
+      IT_WORKS.new(ctx).root
+
     when path.split('/').size == 4
-      IT_WORKS.get("/hello/:outer/:world")
+      pieces = path.split('/')
+      IT_WORKS.new(ctx).hello( pieces[-2], pieces[-1] )
+
     else
-      IT_WORKS.get("/hello/:name")
+      pieces = path.split('/')
+      IT_WORKS.new(ctx).hello(pieces.last)
+
     end
     ctx.results
   end # === def routes
 
 end # === struct IT_WORKS
 
-describe DA_ROUTER do
+describe "DA_ROUTER" do
 
   it "routes root path" do
     IT_WORKS.run("GET", "/")
