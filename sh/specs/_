@@ -16,10 +16,11 @@ case "$ACTION" in
   watch)
     local +x CMD="da_router.cr specs run"
     ${=CMD} || :
-    process watch "-r sh -r bin -r src -r specs" "$CMD"
+    process watch "-r scripts -r sh -r bin -r src -r specs" "$CMD"
     ;;
 
   run)
+    reset
     cd "$THIS_DIR"
     mkdir -p tmp/in tmp/out
     sh_color ORANGE "=== {{Compiling}}..."

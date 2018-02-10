@@ -1,5 +1,5 @@
 
-struct IT_WORKS
+class IT_WORKS
 
   include DA_ROUTER
 
@@ -19,7 +19,15 @@ struct IT_WORKS
 
   def self.run(meth, path)
     ctx = CTX.new(meth, path)
-    DA_ROUTER.route!(ctx)
+    path = ctx.request.path
+    case
+    when path == "/"
+      IT_WORKS.get("/")
+    when path.split('/').size == 4
+      IT_WORKS.get("/hello/:outer/:world")
+    else
+      IT_WORKS.get("/hello/:name")
+    end
     ctx.results
   end # === def routes
 

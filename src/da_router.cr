@@ -1,8 +1,35 @@
 
-{% system(%[bash -c "echo '' > /tmp/da_routes.$(basename $PWD).tmp"]) %}
 require "http"
 
 module DA_ROUTER
+
+  MACRO_ASCII_CODES = {} of _ => _
+
+  {% for x in system(%[ruby #{__DIR__}/../scripts/ascii_codes.rb]).strip.split("\n") %}
+    {% key = x.split.first %}
+    {% code = x.split.last %}
+    {% MACRO_ASCII_CODES[key.id] = code.id %}
+  {% end %}
+
+  macro get(*args, &blok)
+    {% name = "get_#{args.last.id.chars.map { |x| MACRO_ASCII_CODES[x.id] }.join("_").id}".id %}
+    {% if blok %}
+      def {{name}}
+        {% count = 0 %}
+        {% for x in args.last.split("/") %}
+          {% if !x.empty? %}
+            {% count = count + 1 %}
+            {% if x.includes?(":") %}
+              {{x.gsub(/^:/, "").id}} = ctx.request.path.split('/')[{{count}}]
+            {% end %}
+          {% end %}
+        {% end %}
+        {{blok.body}}
+      end
+    {% else %}
+      {{@type}}.new(ctx).{{name}}
+    {% end %}
+  end
 
   macro included
     getter ctx : HTTP::Server::Context
@@ -27,87 +54,11 @@ module DA_ROUTER
     true
   end # === def self.is_match?
 
-  macro route(ctx)
-    crumbs__ = nil
-    ctx__ = {{ctx}}
-    {{yield}}
-    crumbs__ = nil
-    ctx__ = nil
-  end # === macro route
-
-  macro path_to_tuple(path)
-    {% pieces = path.split("/").reject { |x| x.empty? }.map { |x| x[0..0] == ":" ? x.id : x.stringify } %}
-    { {{pieces.join(", ").id}} }
-  end # === macro to_tuple
-
   {% for m in %w(head get post put patch delete options) %}
-    macro {{m.id}}(path, &blok)
-      route({{m}}, \{{path}}, \{{@type.name}}) do
-        \{{blok.body}}
-      end
-    end
+    # macro {{m.id}}(path, &blok)
+    # end
   {% end %}
 
-  macro route(http_method, path, klass, &blok)
-    {% meth = "#{http_method.id}#{path.downcase.gsub(/[^a-z0-9\_]/, "_").id}".id %}
-    {% system(%[bash -c "echo #{http_method.id} #{path.id} #{klass.id} :#{meth.id} >> /tmp/da_router.$(basename $PWD).tmp"]) %}
-    {% arg_names = path.split("/").select { |x| x =~ /^:/ }.map { |x| x.gsub(/^\:/, "").id }.join(", ").id %}
-    def {{meth.id}}({{arg_names}})
-      {{blok.body}}
-    end
-
-  end # === macro match
-
-  macro _get(path, &blok)
-    {% puts "from macro get: #{__FILE__}" %}
-    {% puts "from macro get: #{__DIR__}" %}
-    {% meth_name = "get#{path.downcase.gsub(/[^a-z0-9\_]/, "_").id}".id %}
-    {% arg_names = path.split("/").select { |x| x =~ /^:/ }.map { |x| x.gsub(/^\:/, "").id }.join(", ").id %}
-
-    {% puts system(%[bash -c "echo  get #{path.id} #{@type.name} :#{meth_name} >> /tmp/da_router.$(basename $PWD).tmp"]).stringify %}
-    def {{meth_name}}({{arg_names}})
-      {{blok.body}}
-    end
-  end # === macro get
-
-  macro route!(ctx)
-    crumbs__ = nil
-    ctx__ = {{ctx}}
-    {% for line in system("cat /tmp/da_router.$(basename $PWD).tmp").split("\n") %}
-      {% if !line.strip.empty? %}
-        {% line = line.split %}
-        {% http_method = line.first %}
-        {% path = line[1] %}
-        {% klass = line[2].id %}
-        {% meth = line.last.gsub(/^\:/, "") %}
-        {% if path == "/" %}
-          if ctx__.request.path == "/" && ctx__.request.method == "{{http_method.upcase.id}}"
-            return {{klass}}.new(ctx__).{{meth.id}}
-          end
-        {% else %}
-          crumbs__ = crumbs__ || (ctx__.request.path).split("/").reject { |s| s.empty? }
-          if DA_ROUTER.is_match?(crumbs__, path_to_tuple({{path}})) && ctx__.request.method == "{{http_method.upcase.id}}"
-            return {{klass}}.new(ctx__).{{meth.id}}(
-              {%
-               positions = [] of StringLiteral
-               i = -1
-               path.split("/").reject { |s| s.empty? }.map { |s|
-                 i = i + 1
-                 if s[0..0] == ":"
-                   positions.push("crumbs__[" + i.stringify + "]")
-                 else
-                   nil
-                 end
-               }.reject { |v| !v }
-               %}
-              {{positions.join(", ").id}}
-            )
-          end
-        {% end %}
-      {% end %}
-    {% end %}
-    {% system(%[bash -c "rm -f /tmp/da_router.$(basename $PWD).tmp"]) %}
-  end # === macro routes!
 
 end # === module DA_ROUTER
 
